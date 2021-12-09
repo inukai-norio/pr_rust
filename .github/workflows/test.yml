@@ -18,5 +18,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+          args: --release
       - run: |
-          ls -al
+          ls -al ./target/release/pr_rust
+          ./target/release/pr_rust
