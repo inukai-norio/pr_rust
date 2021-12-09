@@ -1,0 +1,129 @@
+name: crate release
+
+on:
+  workflow_dispatch:
+    inputs:
+      versioning_level:
+        type: choice
+        required: true
+        description: level
+        options: 
+          - patch
+          - minor
+          - major
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_list: ${{ steps.status.outputs.pr_list }}
+      pr_count: ${{ steps.status.outputs.pr_count }}
+      next_tag: ${{ steps.next_tag.outputs.name }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - id: status
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::set-output name=pr_list::$(gh pr list --state open --base master --head 'release/v*' --author 'app/github-actions')"
+          echo "::set-output name=pr_count::$(gh pr list --state open --base master --head 'release/v*' --author 'app/github-actions' | wc -l)"
+          echo "::set-output name=describe::$(git describe --tags)"
+          echo "::set-output name=latest_tag::$(git describe --abbrev=0 --tags)"
+
+      - id: latest_version
+        shell: bash
+        env:
+          latest_tag: ${{ steps.status.outputs.latest_tag }}
+        run: |
+          if [[ $latest_tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::set-output name=major::$(echo $latest_tag | sed -r 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1/')"
+            echo "::set-output name=minor::$(echo $latest_tag | sed -r 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\2/')"
+            echo "::set-output name=patch::$(echo $latest_tag | sed -r 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\3/')"
+          else
+            return 1
+          fi
+      - name: output version
+        id: version
+        shell: bash
+        env:
+          major: ${{ steps.latest_version.outputs.major }}
+          minor: ${{ steps.latest_version.outputs.minor }}
+          patch: ${{ steps.latest_version.outputs.patch }}
+          versioning_level: ${{ github.event.inputs.versioning_level }}
+        run: |
+          if [ ${versioning_level} = 'major' ]; then
+            echo "::set-output name=major::$((${major}+1))"
+            echo "::set-output name=minor::0"
+            echo "::set-output name=patch::0"
+          elif [ ${versioning_level} = 'minor' ]; then
+            echo "::set-output name=major::${major}"
+            echo "::set-output name=minor::$((${minor}+1))"
+            echo "::set-output name=patch::0"
+          elif [ ${versioning_level} = 'patch' ]; then
+            echo "::set-output name=major::${major}"
+            echo "::set-output name=minor::${minor}"
+            echo "::set-output name=patch::$((${patch}+1))"
+          else
+            return 1
+          fi
+      - id: next_tag
+        env:
+          major: ${{ steps.version.outputs.major }}
+          minor: ${{ steps.version.outputs.minor }}
+          patch: ${{ steps.version.outputs.patch }}
+        run: |
+          echo "::set-output name=name::v${major}.${minor}.${patch}"
+
+  create_pr:
+    runs-on: ubuntu-latest
+    needs: [version]
+    if: ${{ needs.version.outputs.pr_count == 0 }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: git config
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      - name: git push
+        env:
+          VERSION: ${{ needs.version.outputs.next_tag }}
+        run: |
+          git switch -c "release/${VERSION}" 
+          echo "${VERSION}" > VERSION
+          git add VERSION
+          git commit -m "version up (${VERSION})"
+          git push origin release/${VERSION}
+
+      - name: create pr
+        env:
+          VERSION: ${{ needs.version.outputs.next_tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$VERSION ${{ steps.status.outputs.pr }}"
+          gh pr create --base master --head release/${VERSION} --title "${VERSION} さくせい" --body "test"
+
+  comment_pr:
+    runs-on: ubuntu-latest
+    needs: [version]
+    if: ${{ needs.version.outputs.pr_count != 0 }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: comment
+        shell: bash
+        env:
+          VERSION: ${{ needs.version.outputs.next_tag }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment $(echo "${{ needs.version.outputs.pr_list }}" | cut -f1) --body "
+          ${VERSION} release 依頼がありましたが、
+          こちらの PR があるので、キャンセルされました。
+          "
+
