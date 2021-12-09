@@ -13,7 +13,7 @@ jobs:
       - name: Setup rust
         uses: actions-rs/toolchain@v1
         with:
-          override: true
+          toolchain: stable
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
