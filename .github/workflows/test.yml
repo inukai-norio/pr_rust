@@ -19,4 +19,4 @@ jobs:
         with:
           command: build
       - run: |
-          ./target/release/pr_rust
+          ls -al ./target/release/pr_rust
