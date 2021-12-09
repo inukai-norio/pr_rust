@@ -1,9 +1,7 @@
 name: test
 
 on:
-  pull_request:
-    branches:
-      - master
+  - push
 
 jobs:
   version:
@@ -14,6 +12,8 @@ jobs:
           fetch-depth: 0
       - name: Setup rust
         uses: actions-rs/toolchain@v1
+        with:
+          override: true
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
