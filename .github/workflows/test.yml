@@ -1,0 +1,22 @@
+name: test
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup rust
+        uses: actions-rs/toolchain@v1
+      - name: Release build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - run: |
+          ./target/release/pr_rust
