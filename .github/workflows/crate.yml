@@ -98,6 +98,7 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.next_tag }}
         run: |
+          cargo install cargo-edit
           cargo set-version --bump ${{ github.event.inputs.versioning_level }} | grep Upgraded | sed -r 's/^.*\s+(\S+)$/\1/' > VERSION
           git switch -c "release/$(cat VERSION)"
           git add -A
