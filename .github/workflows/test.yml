@@ -20,5 +20,4 @@ jobs:
           command: build
           args: --release
       - run: |
-          ls -al ./target/release/pr_rust
           ./target/release/pr_rust
