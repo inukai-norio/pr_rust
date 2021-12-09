@@ -100,10 +100,10 @@ jobs:
         run: |
           cargo install cargo-edit
           cargo set-version --bump ${{ github.event.inputs.versioning_level }} | grep Upgraded | sed -r 's/^.*\s+(\S+)$/\1/' > VERSION
-          git switch -c "release/$(cat VERSION)"
+          git switch -c "release/v$(cat VERSION)"
           git add -A
           git commit -m "version up ($(cat VERSION))"
-          git push origin release/$(cat VERSION)
+          git push origin release/v$(cat VERSION)
 
       - name: create pr
         env:
@@ -112,7 +112,7 @@ jobs:
         run: |
           echo "$VERSION ${{ steps.status.outputs.pr }}"
           cat VERSION
-          gh pr create --base master --head release/${VERSION} --title $(cat VERSION) さくせい" --body "test"
+          gh pr create --base master --head release/v$(cat VERSION) --title $(cat VERSION) さくせい" --body "test"
 
   comment_pr:
     runs-on: ubuntu-latest
