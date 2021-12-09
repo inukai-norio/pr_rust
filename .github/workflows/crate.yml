@@ -112,7 +112,7 @@ jobs:
         run: |
           echo "$VERSION ${{ steps.status.outputs.pr }}"
           cat VERSION
-          gh pr create --base master --head release/v$(cat VERSION) --title $(cat VERSION) さくせい" --body "test"
+          gh pr create --base master --head release/v$(cat VERSION) --title "$(cat VERSION) さくせい" --body "test"
 
   comment_pr:
     runs-on: ubuntu-latest
