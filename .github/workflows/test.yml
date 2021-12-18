@@ -14,6 +14,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          components: cargo-edit
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
