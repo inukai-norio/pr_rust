@@ -15,13 +15,13 @@ jobs:
         with:
           toolchain: stable
       - run: |
-          cargo search --limit 1  cargo-edit | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
+          cargo search --limit 1 cargo-edit 2> /dev/null | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
       - run: |
           cargo install cargo-edit
       - run: |
-          find ~ | grep cargo-set-version
+          $HOME/.cargo/bin/cargo-set-version -V
       - run: |
-          cargo search --limit 1  cargo-edit | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
+          cargo search --limit 1 cargo-edit | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
