@@ -14,7 +14,12 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: cargo-edit
+      - name: git push
+        env:
+          VERSION: ${{ needs.version.outputs.next_tag }}
+        run: |
+          cargo install cargo-edit
+          find ~
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
