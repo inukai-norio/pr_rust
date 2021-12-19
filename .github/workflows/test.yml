@@ -14,9 +14,21 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: |
-          cargo search --limit 1 cargo-edit 2> /dev/null | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
-      - run: |
+      - id: cargo-edit
+        shell: bash
+        run: |
+          echo "::set-output name=version::$(cargo search --limit 1 cargo-edit 2> /dev/null | head -n1 | cut -d' ' -f3 | cut -d'"' -f2)"
+
+      - name: Cache cargo-edit
+        id: cache-cargo
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.cargo/bin
+          key: ${{ runner.os }}-${{ steps.cargo-edit.outputs.version }}
+
+      - name: cargo-edit
+        if: steps.cache-cargo.outputs.cache-hit != 'true'
+        run: |
           cargo install cargo-edit
       - run: |
           $HOME/.cargo/bin/cargo-set-version -V
