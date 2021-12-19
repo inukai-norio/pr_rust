@@ -32,8 +32,6 @@ jobs:
           cargo install cargo-edit
       - run: |
           $HOME/.cargo/bin/cargo-set-version -V
-      - run: |
-          cargo search --limit 1 cargo-edit | head -n1 | cut -d' ' -f3 | cut -d'"' -f2
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
