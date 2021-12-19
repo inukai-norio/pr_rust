@@ -14,6 +14,10 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+      - name: check
+        shell: bash
+        run: |
+          cargo search --limit 1 cargo-edit
       - id: cargo-edit
         shell: bash
         run: |
