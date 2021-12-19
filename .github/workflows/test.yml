@@ -32,7 +32,7 @@ jobs:
         run: |
           cargo install cargo-edit
           cp ~/.cargo/bin/cargo-set-version ~/cargo-set-version
-      - name: cargo-edit
+      - name: cp
         if: steps.cache-cargo.outputs.cache-hit == 'true'
         run: |
           cp ~/cargo-set-version ~/.cargo/bin/cargo-set-version
