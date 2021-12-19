@@ -40,6 +40,7 @@ jobs:
           find $HOME/.cargo/bin/
       - run: |
           $HOME/.cargo/bin/cargo-set-version -V
+          cargo set-version --bump patch --dry-run
       - name: Release build
         uses: actions-rs/cargo@v1
         with:
