@@ -23,8 +23,8 @@ jobs:
         id: cache-cargo
         uses: actions/cache@v2
         with:
-          path: $HOME/.cargo/bin
-          key: ${{ runner.os }}-${{ steps.cargo-edit.outputs.version }}
+          path: $HOME/.cargo/bin/
+          key: v2-${{ runner.os }}-${{ steps.cargo-edit.outputs.version }}
 
       - name: cargo-edit
         if: steps.cache-cargo.outputs.cache-hit != 'true'
