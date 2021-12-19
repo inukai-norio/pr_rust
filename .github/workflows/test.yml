@@ -23,19 +23,14 @@ jobs:
         id: cache-cargo
         uses: actions/cache@v2
         with:
-          path: ~/cargo-set-version
-          key: v5-${{ runner.os }}-${{ steps.cargo-edit.outputs.version }}
+          path: ~/.cargo/bin/cargo-set-version
+          key: v6-${{ runner.os }}-${{ steps.cargo-edit.outputs.version }}
       - run: |
           find ~/.cargo/bin/
       - name: cargo-edit
         if: steps.cache-cargo.outputs.cache-hit != 'true'
         run: |
           cargo install cargo-edit
-          cp ~/.cargo/bin/cargo-set-version ~/cargo-set-version
-      - name: cp
-        if: steps.cache-cargo.outputs.cache-hit == 'true'
-        run: |
-          cp ~/cargo-set-version ~/.cargo/bin/cargo-set-version
       - run: |
           find $HOME/.cargo/bin/
       - run: |
